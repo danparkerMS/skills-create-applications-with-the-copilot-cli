@@ -8,6 +8,9 @@
  *   - Subtraction     (- or "subtract")
  *   - Multiplication  (* or "multiply")
  *   - Division        (/ or "divide")
+ *   - Modulo          (% or "modulo")
+ *   - Power           (^ or "power")
+ *   - Square root     (sqrt)
  *
  * Usage:
  *   node calculator.js <num1> <operator> <num2>
@@ -40,6 +43,27 @@ function divide(a, b) {
   return a / b;
 }
 
+// Returns the remainder of dividing the first number by the second. Throws an error on modulo by zero.
+function modulo(a, b) {
+  if (b === 0) {
+    throw new Error('Modulo by zero is not allowed.');
+  }
+  return a % b;
+}
+
+// Raises the first number to the power of the second.
+function power(a, b) {
+  return Math.pow(a, b);
+}
+
+// Returns the square root of a number. Throws an error for negative numbers.
+function sqrt(a) {
+  if (a < 0) {
+    throw new Error('Cannot calculate the square root of a negative number.');
+  }
+  return Math.sqrt(a);
+}
+
 // Maps supported operator symbols and words to their corresponding function.
 const OPERATIONS = {
   '+': add,
@@ -50,33 +74,39 @@ const OPERATIONS = {
   multiply: multiply,
   '/': divide,
   divide: divide,
+  '%': modulo,
+  modulo: modulo,
+  '^': power,
+  power: power,
+  sqrt: sqrt,
 };
 
-// Performs the requested operation on two numbers.
+// Performs the requested operation on two numbers (sqrt only uses the first number).
 function calculate(num1, operator, num2) {
   const operation = OPERATIONS[operator];
   if (!operation) {
     throw new Error(
-      `Unsupported operator "${operator}". Supported operators: + - * / (add, subtract, multiply, divide).`
+      `Unsupported operator "${operator}". Supported operators: + - * / % ^ sqrt (add, subtract, multiply, divide, modulo, power, sqrt).`
     );
   }
-  return operation(num1, num2);
+  return operator === 'sqrt' ? operation(num1) : operation(num1, num2);
 }
 
 // Parses command-line arguments, runs the calculation, and prints the result.
 function main() {
   const args = process.argv.slice(2);
 
-  if (args.length !== 3) {
+  if (args.length !== 3 && !(args.length === 2 && args[1] === 'sqrt')) {
     console.error('Usage: node calculator.js <num1> <operator> <num2>');
-    console.error('Operators: + - * / (add, subtract, multiply, divide)');
+    console.error('       node calculator.js <num1> sqrt');
+    console.error('Operators: + - * / % ^ sqrt (add, subtract, multiply, divide, modulo, power, sqrt)');
     process.exitCode = 1;
     return;
   }
 
   const [rawNum1, operator, rawNum2] = args;
   const num1 = Number(rawNum1);
-  const num2 = Number(rawNum2);
+  const num2 = operator === 'sqrt' ? 0 : Number(rawNum2);
 
   if (Number.isNaN(num1) || Number.isNaN(num2)) {
     console.error('Both operands must be valid numbers.');
@@ -97,4 +127,4 @@ if (require.main === module) {
   main();
 }
 
-module.exports = { add, subtract, multiply, divide, calculate };
+module.exports = { add, subtract, multiply, divide, modulo, power, sqrt, calculate };
